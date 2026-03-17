@@ -1,0 +1,56 @@
+{% extends "Layout/BaseLayout.html" %}
+
+{% block content %}
+<div class="luft-container luft-mt-4">
+    <div class="luft-card luft-p-4 luft-mb-4">
+        <h2>Processo: Reintegração WMS</h2>
+        <p class="luft-text-muted">Busque e transfira arquivos via SFTP remoto.</p>
+
+        <form id="formPesquisa">
+            <div class="luft-row luft-align-items-end">
+                <div class="luft-col-md-5 luft-mb-3">
+                    <label class="luft-label">Cliente</label>
+                    <select id="selectCliente" name="cliente" class="luft-input" required>
+                        <option value="">Carregando clientes...</option>
+                    </select>
+                </div>
+                <div class="luft-col-md-5 luft-mb-3">
+                    <label class="luft-label">Filtro de Nome (Opcional)</label>
+                    <input type="text" id="inputFiltro" name="filtro" class="luft-input" placeholder="Ex: NOTA_123">
+                </div>
+                <div class="luft-col-md-2 luft-mb-3">
+                    <button type="submit" class="luft-btn luft-btn-primary luft-w-100">Pesquisar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="containerResultados" class="luft-card luft-p-4" style="display: none;">
+        <div class="luft-d-flex luft-justify-between luft-align-items-center luft-mb-3">
+            <h4>Arquivos Encontrados</h4>
+            <button id="btnTransferir" class="luft-btn luft-btn-success" disabled>Transferir Selecionados</button>
+        </div>
+        
+        <div class="luft-table-responsive">
+            <table class="luft-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="checkTodos"></th>
+                        <th>Nome do Arquivo</th>
+                        <th>Tamanho</th>
+                        <th>Data Modificação</th>
+                        <th>Origem</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaArquivosCorpo">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='Js/Reintegracao.js') }}"></script>
+{% endblock %}

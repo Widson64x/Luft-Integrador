@@ -1,0 +1,13 @@
+flask
+flask-login
+pandas
+openpyxl
+paramiko
+ldap3
+werkzeug
+pycryptodome
+# luftcore (baixar manualmente)
+
+# --- NOVAS DEPENDÊNCIAS ---
+SQLAlchemy>=2.0.0
+pyodbc

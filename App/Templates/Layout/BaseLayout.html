@@ -1,0 +1,61 @@
+{% extends "luftcore/base.html" %}
+{% import 'luftcore/components.html' as ui %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='Css/Style.css') }}">
+    
+    <script>
+        const API = {
+            uploadLocal: "{{ url_for('main.uploadLocal') }}",
+            clientes: "{{ url_for('main.apiClientes') }}",
+            pesquisar: "{{ url_for('main.apiReintegracaoPesquisar') }}",
+            transferir: "{{ url_for('main.apiReintegracaoTransferir') }}"
+        };
+    </script>
+{% endblock %}
+
+{% block sidebar_menu %}
+    <a href="{{ url_for('main.home') }}" class="luft-nav-link ativo">
+        <div class="d-flex align-items-center gap-3">
+            <i class="ph-bold ph-house"></i>
+            <span>Dashboard</span>
+        </div>
+    </a>
+
+    {% if pode_ecobox %}
+    <button onclick="LuftCore.abrirModal('modalEcobox')" class="luft-nav-link">
+        <div class="d-flex align-items-center gap-3">
+            <i class="ph-bold ph-package"></i>
+            <span>XMLs Ecobox</span>
+        </div>
+    </button>
+    {% endif %}
+
+    {% if pode_reintegracao %}
+    <button onclick="LuftCore.abrirModal('modalReintegracao')" class="luft-nav-link">
+        <div class="d-flex align-items-center gap-3">
+            <i class="ph-bold ph-arrows-left-right"></i>
+            <span>Reintegração WMS</span>
+        </div>
+    </button>
+    {% endif %}
+{% endblock %}
+
+{% block sidebar_actions %}
+    <button onclick="LuftCore.alternarTema()" class="luft-btn-action hover-lift" title="Alternar Tema">
+        <i class="ph-bold ph-moon"></i>
+    </button>
+    <a href="{{ url_for('Seguranca.Configuracoes') }}" class="luft-btn-action hover-lift" title="Configurações">
+        <i class="ph-bold ph-gear"></i>
+    </a>
+    <a href="{{ url_for('main.logout') }}" class="luft-btn-action hover-lift text-danger" title="Sair">
+        <i class="ph-bold ph-power"></i>
+    </a>
+{% endblock %}
+
+{% block content %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='Js/Base.js') }}"></script>
+{% endblock %}

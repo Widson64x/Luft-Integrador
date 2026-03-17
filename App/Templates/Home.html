@@ -1,0 +1,168 @@
+{% extends "Layout/BaseLayout.html" %}
+
+{% block content %}
+<div class="luft-container luft-mt-4">
+    <div class="luft-mb-4">
+        <h2>Painel de Controle</h2>
+        <p class="text-muted">Bem-vindo, <strong>{{ usuario }}</strong>. Escolha um processo abaixo para iniciar.</p>
+    </div>
+
+    <div class="dashboard-grid">
+    {% if pode_ecobox %}
+        <div class="luft-card hover-lift cursor-pointer p-5 text-center" onclick="LuftCore.abrirModal('modalEcobox')">
+            <div class="text-primary mb-3" style="font-size: 3.5rem;">📦</div>
+            <h3 class="mb-2">XMLs Ecobox</h3>
+            <p class="text-muted m-0">Upload de arquivos XML locais para o servidor de destino.</p>
+        </div>
+    {% endif %}
+    {% if pode_reintegracao %}
+        <div class="luft-card hover-lift cursor-pointer p-5 text-center" onclick="LuftCore.abrirModal('modalReintegracao')">
+            <div class="text-primary mb-3" style="font-size: 3.5rem;">🔄</div>
+            <h3 class="mb-2">Reintegração WMS</h3>
+            <p class="text-muted m-0">Busque e transfira arquivos remotamente via SFTP seguro.</p>
+        </div>
+    {% endif %}
+    </div>
+
+    {% if not pode_ecobox and not pode_reintegracao %}
+    <div class="luft-card p-5 text-center">
+        <div class="mb-3" style="font-size: 3.5rem;">🔒</div>
+        <h3 class="mb-2">Nenhum módulo disponível</h3>
+        <p class="text-muted">Você ainda não possui acesso a nenhum módulo deste sistema.</p>
+        <p class="text-muted mb-4">Solicite acesso através do portal de chamado:</p>
+        <a href="https://luftlogistics.desk.ms/?Login" target="_blank" class="btn btn-primary">
+            <i class="ph-bold ph-ticket"></i> Abrir Portal de Chamado
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% if pode_ecobox %}
+{% call ui.modal('modalEcobox', 'XMLs Ecobox', tamanho='md', icone='ph-upload-simple') %}
+    <form id="formUploadLocal" action="{{ url_for('main.uploadLocal') }}" method="POST" enctype="multipart/form-data">
+        
+        <!-- Dropzone Premium -->
+        <div id="dropzoneEcobox" class="upload-dropzone">
+            <input type="file" id="arquivos" name="arquivos" multiple accept=".xml" class="upload-input-hidden">
+            <div class="upload-dropzone-content">
+                <div class="upload-dropzone-icon">
+                    <i class="ph-thin ph-cloud-arrow-up"></i>
+                </div>
+                <h5>Arraste os arquivos XML aqui</h5>
+                <p>ou <span class="upload-dropzone-link">clique para selecionar</span></p>
+                <span class="luft-badge luft-badge-gray">Apenas arquivos .XML</span>
+            </div>
+        </div>
+
+        <!-- Lista de Arquivos Selecionados -->
+        <div id="uploadFileSection" class="upload-file-section d-none">
+            <div class="upload-file-header">
+                <span class="font-semibold text-sm">Arquivos selecionados</span>
+                <span class="luft-badge luft-badge-primary" id="badgeUploadCount">0</span>
+            </div>
+            <div id="listaArquivos" class="upload-file-list"></div>
+        </div>
+
+        <!-- Ações -->
+        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+            <button type="button" class="btn btn-outline text-sm" id="btnLimparArquivos" style="display:none;">
+                <i class="ph ph-trash"></i> Limpar tudo
+            </button>
+            <div class="d-flex gap-2 ml-auto">
+                <button type="button" class="btn btn-secondary" onclick="LuftCore.fecharModal('modalEcobox')">Cancelar</button>
+                <button type="submit" class="btn btn-success" id="btnTransferirLocal" disabled>
+                    <i class="ph-bold ph-paper-plane-right"></i> Transferir
+                </button>
+            </div>
+        </div>
+    </form>
+{% endcall %}
+{% endif %}
+
+{% if pode_reintegracao %}
+{% call ui.modal('modalReintegracao', 'Reintegração WMS', tamanho='lg', icone='ph-arrows-left-right') %}
+    
+    <!-- Painel de Pesquisa -->
+    <div class="reint-search-panel">
+        <div class="reint-info-banner">
+            <i class="ph-fill ph-info"></i>
+            <span>Selecione o cliente e utilize um filtro para localizar os arquivos.</span>
+        </div>
+        
+        <form id="formPesquisa">
+            <div class="reint-search-grid">
+                <div class="reint-field reint-field-cliente">
+                    <label class="form-label font-semibold">Cliente</label>
+                    <div class="reint-input-wrapper">
+                        <i class="ph ph-buildings"></i>
+                        <select id="selectCliente" name="cliente" class="form-control" required>
+                            <option value="">Carregando...</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="reint-field reint-field-filtro">
+                    <label class="form-label font-semibold" for="inputFiltro">Filtro <span class="text-muted font-normal">(Opcional)</span></label>
+                    <div class="reint-input-wrapper">
+                        <i class="ph ph-magnifying-glass"></i>
+                        <input type="text" id="inputFiltro" name="filtro" class="form-control" placeholder="Ex: NOTA_123">
+                    </div>
+                </div>
+
+                <div class="reint-field reint-field-btn">
+                    <button type="submit" class="btn btn-primary reint-btn-buscar">
+                        <i class="ph-bold ph-magnifying-glass"></i> Buscar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Resultados -->
+    <div id="containerResultados">
+        <div class="resultados-header">
+            <h4>Resultados da Busca</h4>
+            <span class="luft-badge luft-badge-info" id="badgeContador">0 ARQUIVOS</span>
+        </div>
+        
+        <div class="resultados-wrapper">
+            <div class="tabela-container">
+                <table class="tabela-resultados">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="checkTodos"></th>
+                            <th>Nome do Arquivo</th>
+                            <th>Tamanho</th>
+                            <th>Data Modificação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaArquivosCorpo">
+                        <tr id="linhaVazia" class="empty-state-row">
+                            <td colspan="4">
+                                <i class="ph-thin ph-folder-open"></i>
+                                <h5>Nenhum arquivo listado</h5>
+                                <p>Faça uma busca utilizando os filtros acima.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações -->
+    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+        <button type="button" class="btn btn-secondary" onclick="LuftCore.fecharModal('modalReintegracao')">Fechar Janela</button>
+        <button id="btnTransferir" class="btn btn-success" disabled>
+            <i class="ph-bold ph-cloud-arrow-up"></i> Transferir Selecionados
+        </button>
+    </div>
+{% endcall %}
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='Js/Home.js') }}"></script>
+    <script src="{{ url_for('static', filename='Js/Reintegracao.js') }}"></script>
+{% endblock %}

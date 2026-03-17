@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Luft Integrador</title>
+    
+    <link rel="stylesheet" href="/luftcore-assets/css/themes.css">
+    <link rel="stylesheet" href="/luftcore-assets/css/global.css">
+    <link rel="stylesheet" href="/luftcore-assets/css/animations.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Css/Style.css') }}">
+</head>
+<body class="login-wrapper">
+
+    <div class="luft-card login-box">
+        
+        <div class="login-header">
+            <img src="/luftcore-assets/icons/luft-logo-150x150.png" alt="Luft Logo">
+            <h2 class="font-bold text-main" style="font-size: 1.6rem; margin:0;">Luft Integrador</h2>
+            <p class="text-muted mt-2">Insira suas credenciais da rede</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% set classe_alerta = 'luft-alert-danger' if category == 'erro' else 'luft-alert-' + category %}
+                    <div class="luft-alert {{ classe_alerta }} mb-3" style="border-radius: 12px; font-size: 0.9rem;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('main.index') }}">
+            <div class="form-group mb-3">
+                <label for="usuario" class="form-label font-bold text-center d-block">Usuário <span class="text-muted font-normal">(Rede)</span></label>
+                <input type="text" id="usuario" name="usuario" class="form-control text-center" style="border-radius: 25px; padding: 0.8rem;" placeholder="Ex: joao.silva" required autofocus autocomplete="username">
+            </div>
+            
+            <div class="form-group mb-4">
+                <label for="senha" class="form-label font-bold text-center d-block">Senha</label>
+                <input type="password" id="senha" name="senha" class="form-control text-center" style="border-radius: 25px; padding: 0.8rem;" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+            
+            <button type="submit" class="btn-login-premium">
+                Acessar Sistema
+            </button>
+        </form>
+        
+    </div>
+
+</body>
+</html>

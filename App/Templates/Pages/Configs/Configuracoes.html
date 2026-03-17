@@ -1,0 +1,39 @@
+{% extends "Layout/BaseLayout.html" %}
+
+{% block content %}
+<div class="luft-container luft-mt-4">
+    <div class="luft-mb-4">
+        <h2>Configurações</h2>
+        <p class="text-muted">Gerencie as configurações do sistema.</p>
+    </div>
+
+    <div class="dashboard-grid">
+
+        {% if PodeVerPermissoes %}
+        <a href="{{ url_for('Seguranca.VisualizarGerenciador') }}" class="luft-card hover-lift cursor-pointer p-5" style="text-decoration: none;">
+            <div class="d-flex align-items-center gap-4">
+                <div class="config-card-icon" style="
+                    width: 56px; height: 56px; border-radius: var(--luft-radius-xl);
+                    background: var(--luft-primary-100); color: var(--luft-primary-700);
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 1.5rem; flex-shrink: 0;
+                ">
+                    <i class="ph-bold ph-shield-check"></i>
+                </div>
+                <div>
+                    <h3 class="mb-1" style="font-size: var(--luft-text-lg); color: var(--luft-text-main);">Permissões e Acessos</h3>
+                    <p class="text-muted m-0 text-sm">Gerencie permissões por grupo e por usuário. Controle quem pode acessar cada funcionalidade do sistema.</p>
+                </div>
+            </div>
+        </a>
+        {% else %}
+        <div class="text-center p-12" style="grid-column: 1 / -1;">
+            <i class="ph-thin ph-code" style="font-size: 4rem; color: var(--luft-primary-400); opacity: 0.5;"></i>
+            <h4 class="mt-4 font-bold" style="color: var(--luft-text-main);">Área em Desenvolvimento</h4>
+            <p class="text-muted text-sm m-0">Novas configurações serão adicionadas em breve.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
