@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Luft Integrador</title>
     
-    <link rel="stylesheet" href="/luftcore-assets/css/themes.css">
-    <link rel="stylesheet" href="/luftcore-assets/css/global.css">
-    <link rel="stylesheet" href="/luftcore-assets/css/animations.css">
+    <link rel="stylesheet" href="{{ request.script_root }}/luftcore-assets/css/themes.css">
+    <link rel="stylesheet" href="{{ request.script_root }}/luftcore-assets/css/global.css">
+    <link rel="stylesheet" href="{{ request.script_root }}/luftcore-assets/css/animations.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='Css/Style.css') }}">
 </head>
 <body class="login-wrapper">
@@ -15,7 +15,7 @@
     <div class="luft-card login-box">
         
         <div class="login-header">
-            <img src="/luftcore-assets/icons/luft-logo-150x150.png" alt="Luft Logo">
+            <img src="{{ request.script_root }}/luftcore-assets/icons/luft-logo-150x150.png" alt="Luft Logo">
             <h2 class="font-bold text-main" style="font-size: 1.6rem; margin:0;">Luft Integrador</h2>
             <p class="text-muted mt-2">Insira suas credenciais da rede</p>
         </div>

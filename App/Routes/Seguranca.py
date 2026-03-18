@@ -2,15 +2,9 @@ import os
 from flask import Blueprint, render_template, request, jsonify, flash, url_for, redirect
 from flask_login import login_required, current_user
 
-# Importe a sua sessão de banco de dados
 from App.Db.Connections import GetSqlServerSession 
-
-# Importe as models que copiamos do LuftControl (ajuste o caminho se necessário)
 from App.Models.SqlServer.Permissoes import Tb_PLN_Permissao, Tb_PLN_PermissaoGrupo, Tb_PLN_PermissaoUsuario
-# Se você tiver uma model separada para Usuario e UsuarioGrupo no DB, importe-as aqui:
 from App.Models.SqlServer.Usuario import Usuario, UsuarioGrupo
-
-# Importe o serviço que criamos no passo anterior
 from App.Services.PermissaoService import RequerPermissao, PermissaoService, DEBUG_PERMISSIONS
 
 # Criando o Blueprint para Segurança

@@ -1,4 +1,5 @@
 import pandas as pd
+from dotenv import load_dotenv
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 
@@ -10,6 +11,8 @@ from App.Services.TransferenciaService import TransferenciaService
 
 # Importação do serviço de permissão
 from App.Services.PermissaoService import RequerPermissao, PermissaoService, DEBUG_PERMISSIONS
+
+load_dotenv()  # Carrega as variáveis de ambiente do arquivo .env
 
 bp = Blueprint("main", __name__)
 
@@ -52,7 +55,7 @@ def index():
 @RequerPermissao('INTEGRADOR.VISUALIZAR')
 def home():
     pode_ecobox = True if DEBUG_PERMISSIONS else PermissaoService.VerificarPermissao(current_user, 'XML_ECOBOX.SINCRONIZAR')
-    pode_reintegracao = True if DEBUG_PERMISSIONS else PermissaoService.VerificarPermissao(current_user, 'REINTEGRACAO_WMS.VISUALIZAR')
+    pode_reintegracao = True if DEBUG_PERMISSIONS else PermissaoService.VerificarPermissao(current_user, 'REINTEGRACAO_WMS.SINCRONIZAR')
     return render_template(
         "Home.html",
         usuario=current_user.nome,
@@ -90,13 +93,13 @@ def uploadLocal():
 
 @bp.route("/reintegracao")
 @login_required
-@RequerPermissao('REINTEGRACAO_WMS.VISUALIZAR')
+@RequerPermissao('REINTEGRACAO_WMS.SINCRONIZAR')
 def reintegracao():
     return render_template("Reintegracao.html")
 
 @bp.route("/api/reintegracao/pesquisar", methods=["POST"])
 @login_required
-@RequerPermissao('REINTEGRACAO_WMS.VISUALIZAR')
+@RequerPermissao('REINTEGRACAO_WMS.SINCRONIZAR')
 def apiReintegracaoPesquisar():
     cliente = request.form.get("cliente")
     filtro = request.form.get("filtro", "").strip()
@@ -128,7 +131,7 @@ def apiReintegracaoTransferir():
 
 @bp.route("/api/clientes", methods=["GET"])
 @login_required
-@RequerPermissao('REINTEGRACAO_WMS.VISUALIZAR')
+@RequerPermissao('REINTEGRACAO_WMS.SINCRONIZAR')
 def apiClientes():
     clientes = ExcelService.carregarClientes('Teste')
     if (clientes.any()):

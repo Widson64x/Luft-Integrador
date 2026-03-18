@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, app
 from flask_login import LoginManager, current_user
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -16,7 +16,7 @@ def criarApp():
         __name__,
         template_folder=os.path.join(os.path.dirname(__file__), "Templates"),
         static_folder=os.path.join(os.path.dirname(__file__), "Static"),
-        static_url_path=f"{BASE_PREFIX}/Static",
+        # REMOVA A LINHA: static_url_path=f"{BASE_PREFIX}/Static"
     )
 
     app.secret_key = os.getenv("APP_SECRET_KEY", "supersegredo")
@@ -57,8 +57,9 @@ def criarApp():
 
     # Registro das Rotas
     from App.Routes.Main import bp
-    app.register_blueprint(bp, url_prefix=BASE_PREFIX)
+    app.register_blueprint(bp)  # <-- Remova o url_prefix daqui
+    
     from App.Routes.Seguranca import security_bp
-    app.register_blueprint(security_bp, url_prefix=BASE_PREFIX)
+    app.register_blueprint(security_bp) # <-- Remova o url_prefix daqui
 
     return app
