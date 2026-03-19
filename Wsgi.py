@@ -1,4 +1,10 @@
 import os
+from dotenv import load_dotenv
+
+# 1º - CARREGA AS VARIÁVEIS DE AMBIENTE PRIMEIRO!
+load_dotenv()
+
+# 2º - SÓ DEPOIS IMPORTA A APLICAÇÃO E O SERVIDOR
 from waitress import serve
 from App import criarApp
 
@@ -11,5 +17,4 @@ if __name__ == "__main__":
     
     print(f"Acesse: http://{HOST}:{PORT}{BASE_PREFIX}")
     
-    # O url_prefix AQUI vai ensinar corretamente o LuftCore a buscar o CSS/JS
-    serve(app, host=HOST, port=PORT, threads=100, url_prefix=BASE_PREFIX)
+    serve(app, host=HOST, port=PORT, threads=6, url_prefix=BASE_PREFIX)

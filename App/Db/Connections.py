@@ -2,6 +2,7 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 
 # URL de conexão (Exemplo usando pyodbc para SQL Server)
 # App/Db/Connections.py
@@ -20,5 +21,5 @@ def get_sqlserver_uri():
     return f"mssql+pyodbc://{user}:{password}@{server_address}/{db}?driver=ODBC+Driver+17+for+SQL+Server"
 
 def GetSqlServerSession():
-    engine = create_engine(get_sqlserver_uri(), pool_pre_ping=True)
+    engine = create_engine(get_sqlserver_uri(), pool_pre_ping=True, poolclass=NullPool)
     return sessionmaker(bind=engine)()
