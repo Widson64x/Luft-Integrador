@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, jsonify, flash, url_for, 
 from flask_login import login_required, current_user
 
 from App.Db.Connections import GetSqlServerSession 
-from App.Models.SqlServer.Permissoes import Tb_PLN_Permissao, Tb_PLN_PermissaoGrupo, Tb_PLN_PermissaoUsuario
+from App.Models.SqlServer.Permissoes import Tb_Permissao, Tb_PermissaoGrupo, Tb_PermissaoUsuario
 from App.Models.SqlServer.Usuario import Usuario, UsuarioGrupo
 from App.Services.PermissaoService import RequerPermissao, PermissaoService, DEBUG_PERMISSIONS
 
@@ -33,7 +33,7 @@ def VisualizarGerenciador():
             UsuarioGrupo.Sigla_UsuarioGrupo.label('Nome_UsuarioGrupo')
         ).outerjoin(UsuarioGrupo, Usuario.codigo_usuariogrupo == UsuarioGrupo.codigo_usuariogrupo).order_by(Usuario.Nome_Usuario).all()
 
-        ListaPermissoes = Sessao.query(Tb_PLN_Permissao).filter_by(Id_Sistema=SISTEMA_ID).order_by(Tb_PLN_Permissao.Categoria_Permissao, Tb_PLN_Permissao.Descricao_Permissao).all()
+        ListaPermissoes = Sessao.query(Tb_Permissao).filter_by(Id_Sistema=SISTEMA_ID).order_by(Tb_Permissao.Categoria_Permissao, Tb_Permissao.Descricao_Permissao).all()
         
         PermissoesPorCategoria = {}
         for p in ListaPermissoes:
@@ -60,7 +60,7 @@ def BuscarAcessosGrupo():
     IdGrupo = request.args.get('idGrupo')
     Sessao = GetSqlServerSession()
     try:
-        Vinculos = Sessao.query(Tb_PLN_PermissaoGrupo).filter_by(Codigo_UsuarioGrupo=IdGrupo).all()
+        Vinculos = Sessao.query(Tb_PermissaoGrupo).filter_by(Codigo_UsuarioGrupo=IdGrupo).all()
         return jsonify({'ids_ativos': [v.Id_Permissao for v in Vinculos]})
     finally: 
         Sessao.close()
@@ -79,8 +79,8 @@ def BuscarAcessosUsuario():
             
         codigo_grupo = User.codigo_usuariogrupo
 
-        ListaGrupo = [p.Id_Permissao for p in Sessao.query(Tb_PLN_PermissaoGrupo).filter_by(Codigo_UsuarioGrupo=codigo_grupo).all()]
-        Overrides = Sessao.query(Tb_PLN_PermissaoUsuario).filter_by(Codigo_Usuario=IdUsuario).all()
+        ListaGrupo = [p.Id_Permissao for p in Sessao.query(Tb_PermissaoGrupo).filter_by(Codigo_UsuarioGrupo=codigo_grupo).all()]
+        Overrides = Sessao.query(Tb_PermissaoUsuario).filter_by(Codigo_Usuario=IdUsuario).all()
         
         return jsonify({
             'heranca_grupo': ListaGrupo, 
@@ -103,19 +103,19 @@ def SalvarVinculo():
     Sessao = GetSqlServerSession()
     try:
         if Tipo == 'Grupo':
-            Vinculo = Sessao.query(Tb_PLN_PermissaoGrupo).filter_by(Codigo_UsuarioGrupo=IdAlvo, Id_Permissao=IdPermissao).first()
+            Vinculo = Sessao.query(Tb_PermissaoGrupo).filter_by(Codigo_UsuarioGrupo=IdAlvo, Id_Permissao=IdPermissao).first()
             if Acao == 'Adicionar' and not Vinculo: 
-                Sessao.add(Tb_PLN_PermissaoGrupo(Codigo_UsuarioGrupo=IdAlvo, Id_Permissao=IdPermissao))
+                Sessao.add(Tb_PermissaoGrupo(Codigo_UsuarioGrupo=IdAlvo, Id_Permissao=IdPermissao))
             elif Acao == 'Remover' and Vinculo: 
                 Sessao.delete(Vinculo)
         else:
-            Vinculo = Sessao.query(Tb_PLN_PermissaoUsuario).filter_by(Codigo_Usuario=IdAlvo, Id_Permissao=IdPermissao).first()
+            Vinculo = Sessao.query(Tb_PermissaoUsuario).filter_by(Codigo_Usuario=IdAlvo, Id_Permissao=IdPermissao).first()
             if Acao == 'Resetar': 
                 if Vinculo: Sessao.delete(Vinculo)
             else:
                 Estado = True if Acao == 'Permitir' else False
                 if not Vinculo: 
-                    Sessao.add(Tb_PLN_PermissaoUsuario(Codigo_Usuario=IdAlvo, Id_Permissao=IdPermissao, Conceder=Estado))
+                    Sessao.add(Tb_PermissaoUsuario(Codigo_Usuario=IdAlvo, Id_Permissao=IdPermissao, Conceder=Estado))
                 else: 
                     Vinculo.Conceder = Estado
         Sessao.commit()
@@ -139,11 +139,11 @@ def CriarNovaPermissao():
     
     Sessao = GetSqlServerSession()
     try:
-        Existe = Sessao.query(Tb_PLN_Permissao).filter_by(Chave_Permissao=ChaveFinal, Id_Sistema=SISTEMA_ID).first()
+        Existe = Sessao.query(Tb_Permissao).filter_by(Chave_Permissao=ChaveFinal, Id_Sistema=SISTEMA_ID).first()
         if Existe:
             flash(f'A chave "{ChaveFinal}" já existe.', 'warning')
         else:
-            Sessao.add(Tb_PLN_Permissao(
+            Sessao.add(Tb_Permissao(
                 Id_Sistema=SISTEMA_ID,
                 Chave_Permissao=ChaveFinal,
                 Descricao_Permissao=Dados.get('descricao'),

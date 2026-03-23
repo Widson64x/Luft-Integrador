@@ -1,0 +1,104 @@
+name: Deploy Luft-Integrador
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    
+    steps:
+    - name: Baixar código (Runner)
+      uses: actions/checkout@v4
+
+    - name: Atualizar Aplicação no Servidor
+      shell: powershell
+      env:
+        COMMIT_MSG: ${{ github.event.head_commit.message }}
+        COMMIT_AUTHOR: ${{ github.actor }}
+        PYTHONUTF8: "1"
+        PYTHONIOENCODING: "utf-8"
+      run: |
+        # --- CONFIGURAÇÕES ---
+        # ATENÇÃO: Verifique se estes nomes correspondem exatamente ao que está no servidor
+        $ServiceName = "Luft-Integrador" 
+        $AppPath = "C:\ProjetosPython\Luft-Integrador"
+        $LogFile = "C:\actions-runner-luft-integrador\deploy-log.txt"
+        $NssmExe = "C:\nssm-2.24\win64\nssm.exe"
+        
+        # Inicia Log
+        Start-Transcript -Path $LogFile -Append
+        Write-Host "--- DEPLOY INICIADO: $(Get-Date) por $env:COMMIT_AUTHOR ---"
+        Write-Host "Msg: $env:COMMIT_MSG"
+        $ErrorActionPreference = "Stop"
+
+        # -----------------------------------------------------------
+        # 1. PARAR SERVIÇO (COM SEGURANÇA)
+        # -----------------------------------------------------------
+        Write-Host "1. Verificando estado do serviço $ServiceName..."
+        
+        $ServiceObj = Get-Service $ServiceName -ErrorAction SilentlyContinue
+        
+        if ($ServiceObj -and $ServiceObj.Status -eq 'Running') {
+            Write-Host "Status atual: RODANDO. Tentando parar..."
+            try {
+                cmd /c "$NssmExe stop $ServiceName" 2>&1 | Out-Null
+                Start-Sleep -Seconds 5
+            } catch {
+                Write-Warning "Aviso ao tentar parar: $_"
+            }
+        } else {
+            Write-Host "O serviço já está PARADO ou não existe. Seguindo..."
+        }
+
+        # -----------------------------------------------------------
+        # 2. ATUALIZAR ARQUIVOS
+        # -----------------------------------------------------------
+        Write-Host "2. Copiando arquivos para $AppPath..."
+        
+        if (-not (Test-Path $AppPath)) { 
+            New-Item -Path $AppPath -ItemType Directory -Force 
+        }
+
+        Copy-Item -Path ".\*" -Destination $AppPath -Recurse -Force -Exclude ".git",".venv"
+        Write-Host "Arquivos copiados com sucesso."
+
+        # -----------------------------------------------------------
+        # 3. ATUALIZAR DEPENDÊNCIAS
+        # -----------------------------------------------------------
+        Write-Host "3. Verificando dependências..."
+        
+        Set-Location $AppPath
+
+        if (Test-Path ".venv") {
+            cmd /c ".venv\Scripts\python.exe -m pip install -r requirements.txt"
+        } else {
+            Write-Warning "Criando venv..."
+            cmd /c "python -m venv .venv"
+            cmd /c ".venv\Scripts\python.exe -m pip install -r requirements.txt"
+        }
+
+        # -----------------------------------------------------------
+        # 4. INICIAR SERVIÇO
+        # -----------------------------------------------------------
+        Write-Host "4. Iniciando serviço $ServiceName..."
+        
+        try {
+             cmd /c "$NssmExe start $ServiceName" 2>&1 | Out-Null
+        } catch {
+             Write-Warning "Tentativa de start retornou erro (pode já estar rodando)."
+        }
+        
+        Start-Sleep -Seconds 5
+        
+        $ServiceStatus = Get-Service $ServiceName
+        if ($ServiceStatus.Status -eq 'Running') {
+            Write-Host "SUCESSO: Serviço iniciado e rodando!"
+        } else {
+            Write-Error "FALHA CRÍTICA: O serviço não subiu. Verifique os logs."
+            Stop-Transcript; exit 1
+        }
+
+        Write-Host "--- DEPLOY FINALIZADO ---"
+        Stop-Transcript
