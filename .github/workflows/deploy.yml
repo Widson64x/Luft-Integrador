@@ -24,7 +24,7 @@ jobs:
         # ATENÇÃO: Verifique se estes nomes correspondem exatamente ao que está no servidor
         $ServiceName = "Luft-Integrador" 
         $AppPath = "C:\ProjetosPython\Luft-Integrador"
-        $LogFile = "C:\actions-runner-luft-integrador\deploy-log.txt"
+        $LogFile = "C:\GitHubRunners\Luft-Integrador\deploy-log.txt"
         $NssmExe = "C:\nssm-2.24\win64\nssm.exe"
         
         # Inicia Log
