@@ -67,7 +67,15 @@ class PermissaoService:
     def RegistrarLogAcesso(UsuarioLogado, Rota, Metodo, Ip, Chave, Permitido, Parametros=None, Retorno=None):
         Sessao = GetSqlServerSession()
         try:
-            nome = getattr(UsuarioLogado, 'Nome_Usuario', 'Anonimo')
+            # Prioriza o login usado na autenticacao; nome completo entra apenas como fallback.
+            nome = (
+                getattr(UsuarioLogado, 'nome', None)
+                or getattr(UsuarioLogado, 'Login', None)
+                or getattr(UsuarioLogado, 'Login_Usuario', None)
+                or getattr(UsuarioLogado, 'Nome_Usuario', None)
+                or getattr(UsuarioLogado, 'nome_completo', None)
+                or 'Anonimo'
+            )
             
             NovoLog = Tb_PLN_LogAcesso(
                 Id_Sistema=SISTEMA_ID,
